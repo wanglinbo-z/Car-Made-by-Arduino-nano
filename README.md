@@ -33,6 +33,7 @@ Car-Made-by-Arduino-nano是一个使用Arduino nano和HC-05蓝牙模块制作的
 ## 贡献
 
 欢迎任何人对本项目进行贡献，无论是提出问题，建议，还是提交代码。如果你想进行重大的改变，请先开启一个issue，讨论你想要改变的内容。请确保更新测试和文档。
+感谢SparkFun提供了tb6612fng驱动的库和教程[TB6612FNG驱动库](https://github.com/sparkfun/SparkFun_TB6612FNG_Arduino_Library)，让我能够更容易地控制电机。
 
 ## 许可
 
