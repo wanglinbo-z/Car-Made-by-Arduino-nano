@@ -1,13 +1,11 @@
 /*
 名称：小车控制
 作者：王淋博
-时间：2023年12月
-描述：
-SparkFun 的库 TB6612FNG 驱动 GitHub 地址：https://github.com/sparkfun/SparkFun_TB6612FNG_Arduino_Library
-NewPing库：https://github.com/livetronic/Arduino-NewPing
+时间：2024年1月
+描述：包含蓝牙控制：
+        w：前进，a：左转，d：右转，s：后退
+      
 */
-// TB6612 电机驱动库
-#include "SparkFun_TB6612.h"
 
 // NewPing 超声波测距库
 #include <NewPing.h>
@@ -28,12 +26,6 @@ const int BIN1 = 6; // 连接到TB6612的BIN1引脚
 const int BIN2 = 5; // 连接到TB6612的BIN2引脚
 const int PWMB = 3; // 连接到TB6612的PWMB引脚
 
-const int offsetA = 1;
-const int offsetB = 1;
-
-Motor motor1 = Motor(AIN1, AIN2, PWMA, offsetA);// 创建Motor对象1
-Motor motor2 = Motor(BIN1, BIN2, PWMB, offsetB);// 创建Motor对象2
-
 // 超声波模块引脚
 const int trigPin = 12; // 超声波模块的Trig引脚连接到Arduino的数字引脚12
 const int echoPin = 13; // 超声波模块的Echo引脚连接到Arduino的数字引脚13
@@ -46,8 +38,8 @@ const int leftObstaclePin = A0;
 const int rightObstaclePin = A1;
 
 // 红外循迹模块引脚定义
-const int leftTrackPin = 7;
-const int rightTrackPin = 8;
+const int leftTrackPin = 8;
+const int rightTrackPin = 7;
 
 // 舵机相关
 Servo servo; // 创建舵机对象
@@ -64,15 +56,15 @@ void setup() {
   BlueTooth.begin(9600);
 
   // 设置电机驱动板引脚为输出模式
-  // pinMode(AIN1, OUTPUT);
-  // pinMode(AIN2, OUTPUT);
-  // pinMode(PWMA, OUTPUT);
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  pinMode(PWMA, OUTPUT);
 
-  // pinMode(BIN1, OUTPUT);
-  // pinMode(BIN2, OUTPUT);
-  // pinMode(PWMB, OUTPUT);
+  pinMode(BIN1, OUTPUT);
+  pinMode(BIN2, OUTPUT);
+  pinMode(PWMB, OUTPUT);
   
-  // 设置红外引脚为输出模式
+  // 设置红外引脚为输入模式
   pinMode(leftObstaclePin, INPUT);
   pinMode(rightObstaclePin, INPUT);
   pinMode(leftTrackPin, INPUT);
@@ -87,20 +79,27 @@ void setup() {
 }
 
 void loop() {
-  while (Serial.available()){
-    // 蓝牙控制
-    bluetooth(); 
-    
-    // 重置电机状态
-    digitalWrite(AIN1, LOW);
-    digitalWrite(AIN2, LOW);
-    digitalWrite(BIN1, LOW);
-    digitalWrite(BIN2, LOW);
+  // while (Serial.available()){
+  //   // 蓝牙控制
+  //   bluetooth(); 
+  //   delay(500);
+  //   // 重置电机状态
+  //   digitalWrite(AIN1, LOW);
+  //   digitalWrite(AIN2, LOW);
+  //   digitalWrite(BIN1, LOW);
+  //   digitalWrite(BIN2, LOW);
+  // }
+  if (digitalRead(leftTrackPin) == HIGH){
+      Serial.print("leftTrackPin: HIGH\n");
   }
+  else {
+      Serial.print("leftTrackPin: LOW\n");
+  }
+  delay(500);
 }
 
 // 超声波
-void csb(){
+void Ultrasound(){
   for (int angle = 0; angle <= 180; angle += 30) {
     // 控制舵机旋转到指定角度
     servo.write(angle);
@@ -120,7 +119,7 @@ void csb(){
     int distance = duration * 0.034 / 2;
 
     Serial.print("Angle: ");
-    Serial.print(angle);
+    Serial.println(angle);
     Serial.print("  Distance: ");
     Serial.println(distance);
   }
@@ -128,8 +127,33 @@ void csb(){
   delay(1000); // 旋转一轮后等待1秒再重复
 }
 
+// 避障检测
+void Avoidance(){
+  int leftSensorValue = digitalRead(leftObstaclePin);
+  int rightSensorValue = digitalRead(rightTrackPin);
+  if (leftSensorValue == LOW && rightSensorValue == LOW) {
+    // 左右传感器都检测到障碍物
+    // 做相应的动作，比如停止
+    Serial.println("障碍物在左右两侧");
+  } else if (leftSensorValue == LOW) {
+    // 只有左侧传感器检测到障碍物
+    // 做相应的动作，比如向右转
+    Serial.println("障碍物在左侧");
+  } else if (rightSensorValue == LOW) {
+    // 只有右侧传感器检测到障碍物
+    // 做相应的动作，比如向左转
+    Serial.println("障碍物在右侧");
+  } else {
+    // 没有检测到障碍物
+    // 继续前进
+    Serial.println("无障碍物");
+  }
+  delay(100); // 延迟以稳定读数
+}
+}
+
 // 循迹检测
-int Avoidance(){
+int Follow_the_Trace(){
   // 循迹检测
   if (digitalRead(leftTrackPin) == LOW && digitalRead(rightTrackPin) == LOW) {
     Serial.println("Both tracks on the line. Move forward.");
@@ -154,20 +178,22 @@ int Avoidance(){
 void bluetooth(){
     // 读取蓝牙指令
     int BTin = Serial.read();
+    Serial.println("Received BTmessage:");
+    Serial.print(BTin);
     // 判断指令
-    if (BTin == 119 || BTin == 87){
+    if (BTin == 'w' || BTin == 'F'){
       // 前进
       Serial.print("前进\n");
       march();
-    }else if (BTin == 65 || BTin == 97){
+    }else if (BTin == 'a' || BTin == 'L'){
       // 左转
       Serial.print("左转\n");
       left();  
-    }else if (BTin == 68|| BTin == 100){
+    }else if (BTin == 'd'|| BTin == 'R'){
       // 右转
       Serial.print("右转\n");
       right(); 
-    }else if (BTin == 83 || BTin == 115){
+    }else if (BTin == 's' || BTin == 'G'){
       // 后退
       Serial.print("后退\n");
       back();  
@@ -232,4 +258,3 @@ void back(){
 }
  
   
-
