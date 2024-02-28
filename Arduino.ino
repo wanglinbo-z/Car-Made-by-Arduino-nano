@@ -150,7 +150,6 @@ void Avoidance(){
   }
   delay(100); // 延迟以稳定读数
 }
-}
 
 // 循迹检测
 int Follow_the_Trace(){
