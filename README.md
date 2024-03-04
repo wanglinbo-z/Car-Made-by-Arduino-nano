@@ -13,12 +13,17 @@ Car-Made-by-Arduino-nano是一个使用Arduino nano和HC-05蓝牙模块制作的
 
 - Arduino nano
 - HC-05蓝牙模块
+- 舵机（SG80）
+- 超声波模块
 - TB6612FNG电机驱动模块
+- 两个红外循迹，两个红外避障
 - 两个带轮子的电机
 - 一个360度旋转的轮子（非驱动）
 - 两个锂电池电池
 - 一个电池盒（串联）
 - 一些导线和面包板
+- 5V稳压模块
+- 若干杜邦线
 
 你需要按照以下的电路图连接各个组件：
 
@@ -28,7 +33,7 @@ Car-Made-by-Arduino-nano是一个使用Arduino nano和HC-05蓝牙模块制作的
 
 ## 使用
 
-首先，你需要将Arduino nano连接到电脑，并使用Arduino IDE将[这段代码](https://play.google.com/store/apps/details?id=com)上传到Arduino nano上。然后，你需要将电池连接到Arduino nano和电机驱动模块上，给它们供电。接着，你需要打开你的手机上的蓝牙，并搜索HC-05模块，将它们配对。最后，你需要打开你的手机上的应用程序，并选择HC-05模块作为蓝牙设备，然后你就可以使用手机上的按钮控制小车了。
+首先，你需要将Arduino nano连接到电脑，并使用Arduino IDE将[这段代码](https://github.com/wanglinbo-z/Car-Made-by-Arduino-nano/blob/main/Arduino.ino)上传到Arduino nano上。然后，你需要将电池连接到Arduino nano和电机驱动模块上，给它们供电。接着，你需要打开你的手机上的蓝牙，并搜索HC-05模块，将它们配对。最后，你需要打开你的手机上的应用程序，并选择HC-05模块作为蓝牙设备，然后你就可以使用手机上的按钮控制小车了。
 
 ## 贡献
 
