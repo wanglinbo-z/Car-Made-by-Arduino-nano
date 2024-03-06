@@ -46,14 +46,19 @@ void setup(){
   pinMode(leftTrackPin, INPUT);
   pinMode(rightTrackPin, INPUT);
     
-  Serial.println(＂Arduino is readly!＂);
+  Serial.println("Arduino is readly!");
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+  delay(800);                      // wait for a second
+  digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
 }
 
 void loop(){
   while (Follow_the_Trace()){
       
   }
-  Serial.println(＂Reached the end point！＂)；
+  Serial.println("Reached the end point！");
 
   delay(100);
 }
@@ -65,15 +70,17 @@ bool Follow_the_Trace(){
     // 向前运动
     march();
     return 1;
-  } else if (digitalRead(leftTrackPin) == HIGH && digitalRead(rightTrackPin) == LOW) {
+  } else if (digitalRead(leftTrackPin) == LOW && digitalRead(rightTrackPin) == HIGH) {
     // Serial.println("\nLeft track off the line. Turn right.");
     // 向右转
     right();
+    delay(50);
     return 1;
-  } else if (digitalRead(leftTrackPin) == LOW && digitalRead(rightTrackPin) == HIGH) {
+  } else if (digitalRead(leftTrackPin) == HIGH && digitalRead(rightTrackPin) == LOW) {
     // Serial.println("\nRight track off the line. Turn left.");
     // 向左转
     left();
+    delay(50);
     return 1;
   } else {
     Serial.println("\nLost the line. Stop!");
@@ -98,13 +105,18 @@ void march(){
 
   Serial.print("\nMove Foword");
   // 电机1前进
-  digitalWrite(AIN1, HIGH);
-  digitalWrite(AIN2, LOW);
-  analogWrite(PWMA, 154);
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, HIGH);
+  for (int i = 0;i <+ 86;i ++){
+    analogWrite(PWMA, i);
+  }
+
   // 电机2前进
-  digitalWrite(BIN1, HIGH);
-  digitalWrite(BIN2, LOW);
-  analogWrite(PWMB, 154);
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, HIGH);
+  for (int i = 0;i <= 86;i ++){
+    analogWrite(PWMB, 86);
+  }
   delay(10);
 }
 
@@ -113,13 +125,13 @@ void left(){
 
   Serial.print("\nTurn Left");
   // 电机1全速前进
-  digitalWrite(AIN1, HIGH);
-  digitalWrite(AIN2, LOW);
-  analogWrite(PWMA, 224);
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, HIGH);
+  analogWrite(PWMA, 128);
   // 电机2后退
-  digitalWrite(BIN1, LOW);
-  digitalWrite(BIN2, HIGH);
-  analogWrite(PWMB, 24);
+  digitalWrite(BIN1, HIGH);
+  digitalWrite(BIN2, LOW);
+  analogWrite(PWMB, 48);
 
   delay(10);
 }
@@ -129,13 +141,13 @@ void right(){
 
   Serial.print("\nTurn Right");
   // 电机1后退
-  digitalWrite(AIN1, LOW);
-  digitalWrite(AIN2, HIGH);
-  analogWrite(PWMA, 24);
+  digitalWrite(AIN1, HIGH);
+  digitalWrite(AIN2, LOW);
+  analogWrite(PWMA, 48);
   // 电机2全速前进
-  digitalWrite(BIN1, HIGH);
-  digitalWrite(BIN2, LOW);
-  analogWrite(PWMB, 224);
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, HIGH);
+  analogWrite(PWMB, 128);
 
   delay(10);
 }
