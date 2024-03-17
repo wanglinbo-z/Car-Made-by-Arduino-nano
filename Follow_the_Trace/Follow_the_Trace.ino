@@ -74,13 +74,13 @@ bool Follow_the_Trace(){
     // Serial.println("\nLeft track off the line. Turn right.");
     // 向右转
     right();
-    delay(50);
+    delay(100);
     return 1;
   } else if (digitalRead(leftTrackPin) == HIGH && digitalRead(rightTrackPin) == LOW) {
     // Serial.println("\nRight track off the line. Turn left.");
     // 向左转
     left();
-    delay(50);
+    delay(100);
     return 1;
   } else {
     Serial.println("\nLost the line. Stop!");
@@ -107,16 +107,13 @@ void march(){
   // 电机1前进
   digitalWrite(AIN1, LOW);
   digitalWrite(AIN2, HIGH);
-  for (int i = 0;i <+ 86;i ++){
-    analogWrite(PWMA, i);
-  }
+    analogWrite(PWMA, 98);
+  
 
   // 电机2前进
   digitalWrite(BIN1, LOW);
   digitalWrite(BIN2, HIGH);
-  for (int i = 0;i <= 86;i ++){
-    analogWrite(PWMB, 86);
-  }
+    analogWrite(PWMB, 98);
   delay(10);
 }
 

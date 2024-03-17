@@ -27,7 +27,7 @@ const int PWMB = 3; // 连接到TB6612的PWMB引脚
 const int trigPin = 12;
 const int echoPin = 13;
 
-NewPing sonar(12,13,200);
+NewPing sonar(trigPin,echoPin,200);
 
 // 舵机相关
 Servo servo; // 创建舵机对象
@@ -54,8 +54,8 @@ void setup(){
   pinMode(PWMB, OUTPUT);
 
   // 超声模块
-  pinMode(12, OUTPUT);
-  pinMode(13, 0);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, LOW);
 
   digitalWrite(13, LOW);
 
@@ -81,22 +81,10 @@ void loop(){
   }
 
   // 距离回传调试
-  for (int i = 0;i < 3;i ++){
-    Serial.print(dAd[i]);
-    Serial.print(" ");
-  }
-  delay(800);
-
-  // 发送超声波脉冲
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  // 测量超声波回声的时间
-  long duration = pulseIn(echoPin, HIGH);
-  Serial.println((duration * 0.034 / 2));
+  // for (int i = 0;i < 3;i ++){
+  //   Serial.print(dAd[i]);
+  //   Serial.print(" ");
+  // }
   delay(800);
 }
 
@@ -131,12 +119,6 @@ void BlueTooth_ctrl(){
 // 判断如何避障
 void bz(int q,int r,int l){
   if (q < 10 && r < 10 && l < 10){
-
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
-    delay(200);                      // wait for a second
-    digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
-
     // 三向都有障碍
     left_back();
     delay(500);
@@ -144,21 +126,15 @@ void bz(int q,int r,int l){
 
 
 
-  }else if (q < 10 && r < 10 && l < 10){
+  }else if (q < 10 && r < 10 && l > 10){
     // 左边有障碍
     right();
 
-  }else if (q < 10 && r < 10 && l < 10){
+  }else if (q < 10 && r > 10 && l < 10){
     // 右边有障碍
     left();
 
-  }else if (q < 10 && r < 10 && l < 10){
-
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
-    delay(800);                      // wait for a second
-    digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
-
+  }else if (q > 10 && r > 10 && l > 10){
     // 前方畅通
     march();
 
@@ -174,25 +150,31 @@ void i_Ultrasound(int* arr){
   while(i <= 2) {
 
     // 控制舵机旋转到指定角度
-    // if (temp_i == 0){
-    //   void;
-    // }else if (temp_i == 1){
-    //   Servo_degrees_60(1);
-    // }else if (temp_i == 2){
-    //   Servo_degrees_60(0);
-    //   Servo_degrees_60(0);
-    // }
+    if (i == 0){
+      void;
+    }else if (i == 1){
+      Servo_degrees_60(1);
+    }else if (i == 2){
+      Servo_degrees_60(0);
+      Servo_degrees_60(0);
+    }
 
-    int U_distance = sonar.ping_cm();
+    int U_distance_1 = sonar.ping_cm();
+    delay(50);
+    int U_distance_2 = sonar.ping_cm();
+    delay(50);
+    int U_distance_3 = sonar.ping_cm();
+    delay(50);
 
     // 将三向距离回传
-    *(arr + i) = U_distance;
+    *(arr + i) = int((U_distance_1 + U_distance_2 + U_distance_3) / 3);
     i ++;
+
     delay(500);
   }
 
   // 舵机回正
-  // Servo_degrees_60(1);
+  Servo_degrees_60(1);
 }
 
 // 重置电机
