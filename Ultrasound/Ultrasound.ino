@@ -24,9 +24,11 @@ const int BIN1 = 6; // 连接到TB6612的BIN1引脚
 const int BIN2 = 5; // 连接到TB6612的BIN2引脚
 const int PWMB = 3; // 连接到TB6612的PWMB引脚
 
+// 超声
 const int trigPin = 12;
 const int echoPin = 13;
 
+// NewPing
 NewPing sonar(trigPin,echoPin,200);
 
 // 舵机相关
@@ -57,16 +59,9 @@ void setup(){
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, LOW);
 
-  digitalWrite(13, LOW);
-
   servo.attach(servoPin); // 附加舵机到指定的引脚
     
   Serial.println("Arduino is readly!");
-
-//   pinMode(LED_BUILTIN, OUTPUT);
-//   digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
-//   delay(800);                      // wait for a second
-//   digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
 }
 
 void loop(){
@@ -74,7 +69,7 @@ void loop(){
 
   i_Ultrasound(dAd);
 
-  // bz(dAd[0], dAd[1], dAd[2]);
+  bz(dAd[0], dAd[1], dAd[2]);
   
   if (Serial.available()){
     BlueTooth_ctrl();
@@ -86,6 +81,8 @@ void loop(){
   //   Serial.print(" ");
   // }
   delay(800);
+
+  DJ_reset();
 }
 
 // 控制舵机旋转
