@@ -29,7 +29,7 @@ const int trigPin = 12;
 const int echoPin = 13;
 
 // NewPing
-NewPing sonar(trigPin,echoPin,200);
+NewPing sonar(trigPin,echoPin,400);
 
 // 舵机相关
 Servo servo; // 创建舵机对象
@@ -57,7 +57,7 @@ void setup(){
 
   // 超声模块
   pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, LOW);
+  pinMode(echoPin, INPUT);
 
   servo.attach(servoPin); // 附加舵机到指定的引脚
     
@@ -76,30 +76,15 @@ void loop(){
   }
 
   // 距离回传调试
-  // for (int i = 0;i < 3;i ++){
-  //   Serial.print(dAd[i]);
-  //   Serial.print(" ");
-  // }
-  delay(800);
+  for (int i = 0;i < 3;i ++){
+    Serial.print(dAd[i]);
+    Serial.print(" ");
+  }
+  delay(1000);
 
   DJ_reset();
 }
 
-// 控制舵机旋转
-// 参数：1——向右转90度
-//       0——向左转90度
-void Servo_degrees_60(bool Servo_direction){
-  if (Servo_direction){
-    servo.write(25);
-    delay(152);
-    servo.write(90);
-  }else if (!Servo_direction){
-    servo.write(158);
-    delay(155);
-    servo.write(90);
-  }
-
-}
 
 // 蓝牙控制
 void BlueTooth_ctrl(){
@@ -115,27 +100,23 @@ void BlueTooth_ctrl(){
 
 // 判断如何避障
 void bz(int q,int r,int l){
-  if (q < 10 && r < 10 && l < 10){
-    // 三向都有障碍
-    left_back();
-    delay(500);
-    DJ_reset();
-
-
-
-  }else if (q < 10 && r < 10 && l > 10){
-    // 左边有障碍
-    right();
-
-  }else if (q < 10 && r > 10 && l < 10){
-    // 右边有障碍
-    left();
-
-  }else if (q > 10 && r > 10 && l > 10){
-    // 前方畅通
+  if (q > 20 && r > 20 && l > 20){
+    // 前进
     march();
-
-
+  }else if ((q > 20 && r > 20 && l <= 20) || (q <= 20 && r > 20 && l <= 20)){
+    // 右
+    right();
+  }
+  else if ((q > 20 && r <= 20 && l > 20) || (q <= 20 && r <= 20 && l > 20)){
+    // 左
+    left();
+  }else if (q <= 20 && r > 20 && l > 20){
+    // 左或者右
+    if (r >= l){
+      right();
+    }else {
+      left();
+    }
   }
 }
 
@@ -143,35 +124,34 @@ void bz(int q,int r,int l){
 void i_Ultrasound(int* arr){
 
   int i = 0; // dAd数组的位次 0~2
+  uint8_t temp_degrees = 90;
 
   while(i <= 2) {
 
-    // 控制舵机旋转到指定角度
+    // 控制舵机旋转到指定角度 
     if (i == 0){
-      void;
+      temp_degrees = 90;
     }else if (i == 1){
-      Servo_degrees_60(1);
+      temp_degrees = 179;
     }else if (i == 2){
-      Servo_degrees_60(0);
-      Servo_degrees_60(0);
+      temp_degrees = 1;
     }
+    servo.write(temp_degrees);
+    delay(800);
 
-    int U_distance_1 = sonar.ping_cm();
+    int U_distance = sonar.ping_cm();
     delay(50);
-    int U_distance_2 = sonar.ping_cm();
-    delay(50);
-    int U_distance_3 = sonar.ping_cm();
-    delay(50);
-
+    
     // 将三向距离回传
-    *(arr + i) = int((U_distance_1 + U_distance_2 + U_distance_3) / 3);
-    i ++;
+    int temp_distence = int(U_distance);
+    if (temp_distence == 0)
+      temp_distence = 555;
+    *(arr + i) = temp_distence;
 
-    delay(500);
+    i ++;
   }
 
-  // 舵机回正
-  Servo_degrees_60(1);
+
 }
 
 // 重置电机
@@ -202,6 +182,24 @@ void march(){
   for (int i = 0;i <= 128;i += 5){
     analogWrite(PWMB, i);
   }
+  delay(10);
+}
+
+// 后退
+void back(){
+
+  Serial.println("\nMove Back");
+  // 电机1后退
+  digitalWrite(AIN1, HIGH);
+  digitalWrite(AIN2, LOW);
+  analogWrite(PWMA, 98);
+  
+
+  // 电机2后退
+  digitalWrite(BIN1, HIGH);
+  digitalWrite(BIN2, LOW);
+  analogWrite(PWMB, 98);
+  
   delay(10);
 }
 
